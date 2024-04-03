@@ -72,7 +72,8 @@ def perform_custom_calculations(df, formulas):
         new_cols.append(col_name)
     return df[new_cols]  # Return only the newly created columns
 
-def main():
+# --------Area calculation for PCM material--------------//
+def PCM(areaList1):
     """Main function to handle user input and perform operations."""
 
     filename = input("Enter the Excel file path: ")
@@ -90,16 +91,75 @@ def main():
         choice = input("Do you want to calculate the area under the curve (y/n)? ")
         if choice.lower() == "y":
             try:
-                n = int(input("How many times do you want to calculate the area? "))
                 ambientTemp = int(input("Enter the ambient temperature: "))
-                for n in range(n):
+                for n in range(3):
                     start_point = float(input("Enter the starting point (x-coordinate): "))
                     end_point = float(input("Enter the ending point (x-coordinate): "))
                     area = calculate_area_under_curve(df, x_col, y_col, start_point, end_point) - ((end_point-start_point)*ambientTemp)
+                    areaList1.append(round(area,2))
                     print(f"Area under the curve between {start_point} and {end_point}: {area:.2f}")  # Format area with 2 decimal places
             except ValueError:
                 print("Invalid input. Please enter numbers for start and end points.")
-
+        # print(areaList1)
         #
+
+# ------------Area calculation for water-------------//
+def water(areaList2):
+    """Main function to handle user input and perform operations."""
+
+    filename = input("Enter the Excel file path: ")
+    df = read_excel_data(filename)
+
+    if df is not None:
+        # Get column names
+        x_col = input("Enter the column name for the x-axis: ")
+        y_col = input("Enter the column name for the y-axis: ")
+
+        # Plot the data
+        plot_data(df, x_col, y_col)
+
+        # Calculate area under the curve (optional)
+        choice = input("Do you want to calculate the area under the curve (y/n)? ")
+        if choice.lower() == "y":
+            try:
+                ambientTemp = int(input("Enter the ambient temperature: "))
+                for n in range(2):
+                    start_point = float(input("Enter the starting point (x-coordinate): "))
+                    end_point = float(input("Enter the ending point (x-coordinate): "))
+                    area = calculate_area_under_curve(df, x_col, y_col, start_point, end_point) - ((end_point-start_point)*ambientTemp)
+                    areaList2.append(round(area,2))
+                    print(f"Area under the curve between {start_point} and {end_point}: {area:.2f}")  # Format area with 2 decimal places
+            except ValueError:
+                print("Invalid input. Please enter numbers for start and end points.")
+        # print(areaList2)
+        #
+
+def main():
+    areaList1 = []
+    areaList2 = []
+    print("Input data for PCM material")
+    PCM(areaList1)
+    print("Input data for water/reference material")
+    water(areaList2)
+    # print(areaList1)
+    # print(areaList2)
+
+    # input values - test tube weight, PCM weight, water weight, Cp of water,
+    TT_Weight = float(input("Enter mass of test tube: "))
+    PCM_Weight = float(input("Enter mass of PCM material: "))
+    water_Weight = float(input("Enter mass of water: "))
+    Cp_t = float(input("Enter Cp value of Glass of test tube"))
+
+    # Cp in solid state
+    Cp_s = ((((water_Weight*4.18) + (TT_Weight*Cp_t))/PCM_Weight) *areaList1[2]/areaList2[1]) - ((TT_Weight*Cp_t)/PCM_Weight)
+    # Cp in liquid state
+    Cp_l = ((((water_Weight*4.18) + (TT_Weight*Cp_t))/PCM_Weight) *areaList1[0]/areaList2[0]) - ((TT_Weight*Cp_t)/PCM_Weight)
+    # enthalpy of PCM
+
+    print("Cps: ", Cp_s)
+    print("Cpl: ", Cp_l)
+
+
+
                 
 main()
