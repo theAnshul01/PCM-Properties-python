@@ -73,7 +73,7 @@ def perform_custom_calculations(df, formulas):
     return df[new_cols]  # Return only the newly created columns
 
 # --------Area calculation for PCM material--------------//
-def PCM(areaList1):
+def PCM(areaList1, ambientTemp):
     """Main function to handle user input and perform operations."""
 
     filename = input("Enter the Excel file path: ")
@@ -91,7 +91,7 @@ def PCM(areaList1):
         choice = input("Do you want to calculate the area under the curve (y/n)? ")
         if choice.lower() == "y":
             try:
-                ambientTemp = int(input("Enter the ambient temperature: "))
+                # ambientTemp = int(input("Enter the ambient temperature: "))
                 for n in range(3):
                     start_point = float(input("Enter the starting point (x-coordinate): "))
                     end_point = float(input("Enter the ending point (x-coordinate): "))
@@ -104,7 +104,7 @@ def PCM(areaList1):
         #
 
 # ------------Area calculation for water-------------//
-def water(areaList2):
+def water(areaList2, ambientTemp):
     """Main function to handle user input and perform operations."""
 
     filename = input("Enter the Excel file path: ")
@@ -122,13 +122,13 @@ def water(areaList2):
         choice = input("Do you want to calculate the area under the curve (y/n)? ")
         if choice.lower() == "y":
             try:
-                ambientTemp = int(input("Enter the ambient temperature: "))
+                # ambientTemp = int(input("Enter the ambient temperature: "))
                 for n in range(2):
                     start_point = float(input("Enter the starting point (x-coordinate): "))
                     end_point = float(input("Enter the ending point (x-coordinate): "))
                     area = calculate_area_under_curve(df, x_col, y_col, start_point, end_point) - ((end_point-start_point)*ambientTemp)
                     areaList2.append(round(area,2))
-                    print(f"Area under the curve between {start_point} and {end_point}: {area:.2f}")  # Format area with 2 decimal places
+                    # print(f"Area under the curve between {start_point} and {end_point}: {area:.2f}")  # Format area with 2 decimal places
             except ValueError:
                 print("Invalid input. Please enter numbers for start and end points.")
         # print(areaList2)
@@ -137,10 +137,11 @@ def water(areaList2):
 def main():
     areaList1 = []
     areaList2 = []
+    ambientTemp = int(input("Enter the ambient temperature: "))
     print("Input data for PCM material")
-    PCM(areaList1)
+    PCM(areaList1, ambientTemp)
     print("Input data for water/reference material")
-    water(areaList2)
+    water(areaList2, ambientTemp)
     # print(areaList1)
     # print(areaList2)
 
@@ -148,16 +149,30 @@ def main():
     TT_Weight = float(input("Enter mass of test tube: "))
     PCM_Weight = float(input("Enter mass of PCM material: "))
     water_Weight = float(input("Enter mass of water: "))
-    Cp_t = float(input("Enter Cp value of Glass of test tube"))
+    Cp_t = float(input("Enter Cp value of Glass of test tube: "))
 
     # Cp in solid state
     Cp_s = ((((water_Weight*4.18) + (TT_Weight*Cp_t))/PCM_Weight) *areaList1[2]/areaList2[1]) - ((TT_Weight*Cp_t)/PCM_Weight)
     # Cp in liquid state
     Cp_l = ((((water_Weight*4.18) + (TT_Weight*Cp_t))/PCM_Weight) *areaList1[0]/areaList2[0]) - ((TT_Weight*Cp_t)/PCM_Weight)
     # enthalpy of PCM
+    T_init = float(input("Enter initial temperature of PCM: "))
+    # two conditions - supercooled or not 
+    # ! TODO
+    isSupercooled = input("With supercooling ? YES or NO: ")
+    if isSupercooled == "YES" or "yes":
+        T_sat = float(input("Enter saturation temp: "))
+        Hm = ((((water_Weight*4.18) + (TT_Weight*Cp_t))/PCM_Weight) *areaList1[1]/areaList2[0]) * (T_init - T_sat)
+    else:
+        T_m1 = float(input("Enter Tm1 temp: "))
+        T_m2 = T_m1 - 6
+        Hm = ((((water_Weight*4.18) + (TT_Weight*Cp_t))/PCM_Weight) *areaList1[1]/areaList2[0]) * (T_init - T_m1) - (TT_Weight*Cp_t*(T_m1 - T_m2))/PCM_Weight
 
-    print("Cps: ", Cp_s)
-    print("Cpl: ", Cp_l)
+
+    print("Cps: ", round(Cp_s,3))
+    print("Cpl: ", round(Cp_l,3))
+    print("Hm: ", Hm)
+
 
 
 
