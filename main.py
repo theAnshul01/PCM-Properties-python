@@ -142,8 +142,6 @@ def main():
     PCM(areaList1, ambientTemp)
     print("Input data for water/reference material")
     water(areaList2, ambientTemp)
-    # print(areaList1)
-    # print(areaList2)
 
     # input values - test tube weight, PCM weight, water weight, Cp of water,
     TT_Weight = float(input("Enter mass of test tube: "))
@@ -158,7 +156,6 @@ def main():
     # enthalpy of PCM
     T_init = float(input("Enter initial temperature of PCM: "))
     # two conditions - supercooled or not 
-    # ! TODO
     isSupercooled = input("With supercooling ? YES or NO: ")
     if isSupercooled == "YES" or "yes":
         T_sat = float(input("Enter saturation temp: "))
@@ -168,13 +165,8 @@ def main():
         T_m2 = T_m1 - 6
         Hm = ((((water_Weight*4.18) + (TT_Weight*Cp_t))/PCM_Weight) *areaList1[1]/areaList2[0]) * (T_init - T_m1) - (TT_Weight*Cp_t*(T_m1 - T_m2))/PCM_Weight
 
-
     print("Cps: ", round(Cp_s,3))
     print("Cpl: ", round(Cp_l,3))
     print("Hm: ", Hm)
-
-
-
-
-                
+           
 main()
