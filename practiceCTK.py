@@ -1,13 +1,50 @@
 from customtkinter import *
+import pandas as pd
+import matplotlib.pyplot as plt
 
 def show():
     result_label.configure(text=f"Result: {Atemp.get()}")
+
+# function to plot graph ----> 
+def read_excel_data(filename, sheet_name="Sheet1"):
+    
+    try:
+        df = pd.read_excel(filename, sheet_name=sheet_name)
+        return df
+    except FileNotFoundError:
+        print(f"Error: File '{filename}' not found.")
+        return None
+
+def plot_data(df, x_col, y_col):
+    if df is None:
+        print("Error: No data found. Please check the file path.")
+        return
+
+    plt.plot(df[x_col], df[y_col])
+    plt.xlabel(x_col)
+    plt.ylabel(y_col)
+    plt.title(f"Plot of {y_col} vs. {x_col}")
+    plt.grid(True)
+    plt.show(block = False)
+
+def plotcall():
+    # Get user input
+    filename = fPath.get()
+    xname = xCol.get()
+    yname = yCol.get()
+
+    # Check if all input fields have values
+    if filename and xname and yname:
+        df = read_excel_data(filename)
+        plot_data(df, xname, yname)
+    else:
+        print("Please enter all required fields (file path, x-axis name, and y-axis name).")
 
 app = CTk()
 app.geometry("800x600")
 app.title("myApp")
 app.anchor("center")
-set_appearance_mode("dark")
+# set_appearance_mode("dark")
 
 # Configure the grid layout to make the frames equal in width
 app.grid_columnconfigure(0, weight=1)  # Column 0 (frame1)
@@ -33,7 +70,7 @@ frame2.grid(row=0, column=1, sticky="nsew", padx=10)  # Fill the entire column
 # -----------------------------------------------------------PCM Frame-----------------------------------------------------------------/
 
 frame1Title = CTkLabel(master=frame1, text="Phase Changing Material Dataset", text_color="black", font=("Arial", 14, "bold"))
-frame1Title.grid(row=0, column = 2, columnspan = 2, padx=10, pady=10)
+frame1Title.grid(row=0, column = 2, columnspan = 2, padx=20, pady=10)
 # excel filepath - PCM
 excelFilePath = CTkLabel(master=frame1, text="Enter Excel File Path: ", text_color="black")
 excelFilePath.grid(row=1, column = 0, columnspan = 2, padx = 10, pady = 10)
@@ -47,12 +84,17 @@ xCol.grid(row = 2, column = 2, columnspan = 2, padx = 10, pady=10)
 # y col name
 yAxisCol = CTkLabel(master=frame1, text="Y-axis column name ", text_color="black")
 yAxisCol.grid(row=3, column = 0, columnspan = 2, padx = 10, pady = 10)
-yCol = CTkEntry(master=frame1, placeholder_text="x col name")
+yCol = CTkEntry(master=frame1, placeholder_text="y col name")
 yCol.grid(row = 3, column = 2, columnspan = 2, padx = 10, pady=10)
+
+
+
+btn1 = CTkButton(master=frame1, text="Plot Graph", corner_radius=20, fg_color="#C850C0", hover_color="#4158D0", command=plotcall)
+btn1.grid(row = 2, column = 4, padx=10, pady=10)
 
 # PCM - starting point 3 times and ending point 3 times
 nestedFrame1 = CTkFrame(master=frame1, fg_color="#e3a6da")
-nestedFrame1.grid(row = 4, column = 0, columnspan = 4, padx = 10, pady = 10)
+nestedFrame1.grid(row = 4, column = 1, columnspan = 4, padx = 60, pady = 10)
 
 # PCM -starting points
 sPoint1 = CTkLabel(master=nestedFrame1, text="starting point 1", text_color="black")
@@ -142,4 +184,6 @@ result_label.grid(row=1, column=0, columnspan=2, padx=10, pady=10)
 btn = CTkButton(master=app, text = "Click Me", corner_radius=32, fg_color="#C850C0", hover_color="#4158D0", command=show)
 # btn.place(relx=0.5, rely=0.5, anchor="center")
 
+
 app.mainloop()
+
